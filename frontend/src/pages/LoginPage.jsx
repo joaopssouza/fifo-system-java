@@ -55,8 +55,8 @@ function LoginPage() {
         e.preventDefault();
         setError('');
         try {
-            const response = await api.post('/login', { username, password });
-            auth.login(response.data.token);
+            const response = await api.post('/api/auth/login', { username, password });
+            auth.login(response.data.accessToken);
             navigate('/');
         } catch (err) {
             setError('Usuário ou senha inválidos.');

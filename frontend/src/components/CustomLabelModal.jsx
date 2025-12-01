@@ -27,7 +27,6 @@ function CustomLabelModal({ isOpen, onClose }) {
 
     if (!isOpen) return null;
 
-    // --- NOVA LÓGICA ---
     const handleOverlayClick = (e) => {
         if (e.target === e.currentTarget) {
             handleClose();

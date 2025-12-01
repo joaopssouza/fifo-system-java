@@ -52,32 +52,26 @@ function DashboardPage() {
     const [fallbackAvgTimes, setFallbackAvgTimes] = useState({ RTS: 0.0, EHA: 0.0 }); // NOVO
 
     // --- API FALLBACK ATUALIZADA ---
-    const fetchDataApi = useCallback(async () => {
-        // ... (lógica de skip) ...
-		if (initialDataLoaded) {
-             console.log("fetchDataApi: Skipping, initial data already loaded.");
-             return;
-        }
-        console.log("fetchDataApi: Buscando dados via API...");
-
+const fetchDataApi = useCallback(async () => {
+        if (initialDataLoaded) return;
+        
         try {
-            const queueEndpoint = isGuest ? '/public/fifo-queue' : '/api/fifo-queue';
-            const backlogEndpoint = isGuest ? '/public/backlog-count' : '/api/backlog-count';
-            const countsEndpoint = isGuest ? '/public/buffer-counts' : '/api/buffer-counts';
-
-            const [queueRes, backlogRes, countsRes] = await Promise.all([
-                api.get(queueEndpoint),
-                api.get(backlogEndpoint),
-                api.get(countsEndpoint)
+            // Busca paralela: Lista de Pacotes + Estatísticas
+            const [queueRes, statsRes] = await Promise.all([
+                api.get('/api/packages'),
+                api.get('/api/dashboard/stats')
             ]);
 
-            setFallbackQueue(queueRes.data.data || []);
-            setFallbackBacklog(backlogRes.data.count || 0);
-            setFallbackBacklogValue(backlogRes.data.value || 0);
-            setFallbackCounts(countsRes.data.counts || { RTS: 0, EHA: 0, SAL: 0 });
-            setFallbackValues(countsRes.data.values || { RTS: 0, EHA: 0, SAL: 0 });
-            setFallbackAvgTimes(countsRes.data.avgTimes || { RTS: 0.0, EHA: 0.0 }); // NOVO
-            console.log("fetchDataApi: Dados de fallback atualizados.");
+            setFallbackQueue(queueRes.data || []);
+            
+            // --- CORREÇÃO: Usar os dados reais vindos do Java ---
+            const stats = statsRes.data; // O Java retorna o objeto direto
+            
+            setFallbackBacklog(stats.backlogCount || 0);
+            setFallbackBacklogValue(stats.backlogValue || 0);
+            setFallbackCounts(stats.counts || { RTS: 0, EHA: 0, SAL: 0 });
+            setFallbackValues(stats.values || { RTS: 0, EHA: 0, SAL: 0 });
+            setFallbackAvgTimes(stats.avgTimes || { RTS: 0.0, EHA: 0.0 });
 
         } catch (error) {
             console.error("Falha ao buscar dados via API", error);
@@ -88,12 +82,12 @@ function DashboardPage() {
             setFallbackValues({ RTS: 0, EHA: 0, SAL: 0 });
             setFallbackAvgTimes({ RTS: 0.0, EHA: 0.0 }); // NOVO
         } finally {
-             console.log("fetchDataApi: Marcando initialDataLoaded como true.");
+             console.log("/api/packages: Marcando initialDataLoaded como true.");
             setInitialDataLoaded(true);
         }
     }, [isGuest, initialDataLoaded]);
 
-    // ... (useEffect syncTime, fetchDataApi, syncedTime inalterados) ...
+    // ... (useEffect syncTime, /api/packages, syncedTime inalterados) ...
 	useEffect(() => {
         const syncTime = async () => { /* ... (inalterado) ... */
              try {
@@ -144,13 +138,13 @@ function DashboardPage() {
         const now = syncedTime;
         let rtsSeconds = 0;
         let ehaSeconds = 0;
-        const oldestRTS = currentQueue.find(item => item.Buffer === 'RTS');
-        const oldestEHA = currentQueue.find(item => item.Buffer === 'EHA');
+        const oldestRTS = currentQueue.find(item => item.buffer === 'RTS');
+        const oldestEHA = currentQueue.find(item => item.buffer === 'EHA');
         if (oldestRTS) {
-            rtsSeconds = Math.max(0, Math.floor((now - new Date(oldestRTS.EntryTimestamp).getTime()) / 1000));
+            rtsSeconds = Math.max(0, Math.floor((now - new Date(oldestRTS.entryTimestamp).getTime()) / 1000));
         }
         if (oldestEHA) {
-            ehaSeconds = Math.max(0, Math.floor((now - new Date(oldestEHA.EntryTimestamp).getTime()) / 1000));
+            ehaSeconds = Math.max(0, Math.floor((now - new Date(oldestEHA.entryTimestamp).getTime()) / 1000));
         }
         return {
             rts: { item: oldestRTS, duration: rtsSeconds },
@@ -160,7 +154,7 @@ function DashboardPage() {
 
     const filteredQueue = useMemo(() => { /* ... (lógica inalterada, usa currentQueue) ... */
          if (filterBuffer === 'ALL') return currentQueue;
-        return currentQueue.filter(item => item.Buffer === filterBuffer);
+        return currentQueue.filter(item => item.buffer === filterBuffer);
     }, [currentQueue, filterBuffer]);
 
     const openMoveModal = (item) => {/* ... */ setSelectedItem(item); setMoveModalOpen(true);};
@@ -208,12 +202,12 @@ function DashboardPage() {
                     {/* Linha 2 */}
                     <div className="metric-card"> {/* Card Maior Tempo RTS */}
                         <span className="metric-value">{formatDuration(oldestDurations.rts.duration)}</span>
-                        <span className="metric-sub-label">{oldestDurations.rts.item ? oldestDurations.rts.item.TrackingID : '---'}</span>
+                        <span className="metric-sub-label">{oldestDurations.rts.item ? oldestDurations.rts.item.trackingId : '---'}</span>
                         <span className="metric-label">Maior Tempo RTS</span>
                     </div>
                     <div className="metric-card"> {/* Card Maior Tempo EHA */}
                         <span className="metric-value">{formatDuration(oldestDurations.eha.duration)}</span>
-                        <span className="metric-sub-label">{oldestDurations.eha.item ? oldestDurations.eha.item.TrackingID : '---'}</span>
+                        <span className="metric-sub-label">{oldestDurations.eha.item ? oldestDurations.eha.item.trackingId : '---'}</span>
                         <span className="metric-label">Maior Tempo EHA</span>
                     </div>
                      <div className="metric-card buffer-card"> {/* Card Tempo Médio */}
@@ -248,16 +242,15 @@ function DashboardPage() {
                     </header>
                     <div className="fifo-list-body">
                         {filteredQueue.length > 0 ? filteredQueue.map(item => {
-                            const entryTimestamp = new Date(item.EntryTimestamp).getTime();
+                            const entryTimestamp = new Date(item.entryTimestamp).getTime();
                             const durationSeconds = Math.max(0, Math.floor((syncedTime - entryTimestamp) / 1000));
                             return (
                                 /* --- ITEM DA LISTA COM PERFIL CONDICIONAL --- */
-                                <div className={`fifo-list-item ${!isGuest ? 'with-actions' : ''}`} key={item.ID}>
-                                    <span>{item.TrackingID}</span>
+                                <div className={`fifo-list-item ${!isGuest ? 'with-actions' : ''}`} key={item.id}>                                    <span>{item.trackingId}</span>
                                     {/* Exibe perfil ou '---' se for N/A */}
-                                    <span>{item.Profile !== 'N/A' ? item.Profile : '---'}</span>
-                                    <span>{item.Buffer}</span>
-                                    <span>{item.Rua}</span>
+                                    <span>{item.profileType !== 'N/A' ? item.profileType : '---'}</span>
+                                    <span>{item.buffer}</span>
+                                    <span>{item.rua}</span>
                                     <span>{formatDuration(durationSeconds)}</span>
                                     {!isGuest && (
                                         <div className="action-buttons-cell">
@@ -280,7 +273,7 @@ function DashboardPage() {
             {/* ... (Modais) ... */}
 			<ChangePasswordModal isOpen={isChangePasswordModalOpen} onClose={() => setChangePasswordModalOpen(false)} />
             <EntryModal isOpen={isEntryModalOpen} onClose={() => setEntryModalOpen(false)} onSuccess={handleSuccess} />
-            <ExitModal isOpen={isExitModalOpen} onClose={() => setExitModalOpen(false)} onSuccess={handleSuccess} availableIDs={currentQueue.map(item => item.TrackingID)} />
+            <ExitModal isOpen={isExitModalOpen} onClose={() => setExitModalOpen(false)} onSuccess={handleSuccess} availableIDs={currentQueue.map(item => item.trackingId)} />
             <MoveItemModal isOpen={isMoveModalOpen} onClose={closeMoveModal} onSuccess={handleSuccess} item={selectedItem} />
         </div>
     );

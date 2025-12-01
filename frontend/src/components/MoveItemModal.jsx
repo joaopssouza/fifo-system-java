@@ -8,7 +8,7 @@ function MoveItemModal({ isOpen, onClose, onSuccess, item }) {
 
     useEffect(() => {
         if (item) {
-            setNewRua(item.Rua);
+            setNewRua(item.rua);
         }
     }, [item]);
 
@@ -18,7 +18,7 @@ function MoveItemModal({ isOpen, onClose, onSuccess, item }) {
         if (!item) return;
 
         try {
-            await api.put(`/api/package/move/${item.ID}`, { rua: newRua });
+            await api.put(`/api/packages/${item.id}/move`, { rua: newRua });
             onSuccess();
             onClose();
         } catch (err) {
@@ -39,7 +39,7 @@ function MoveItemModal({ isOpen, onClose, onSuccess, item }) {
         <div className="modal-overlay" onMouseDown={handleOverlayClick}>
             <div className="modal-content" onClick={e => e.stopPropagation()}>
                 <div className="modal-header">
-                    <h2>Mover Item: {item.TrackingID}</h2>
+                    <h2>Mover Item: {item.trackingId}</h2>
                     <button className="modal-close-button" onClick={onClose}>&times;</button>
                 </div>
                 <form onSubmit={handleSubmit}>

@@ -9,7 +9,6 @@ function EntryModal({ isOpen, onClose, onSuccess }) {
     const [profile, setProfile] = useState('');
     const [error, setError] = useState('');
 
-    // --- FUNÇÃO PARA LIMPAR ESTADOS ---
     const clearForm = () => {
         setTrackingId('');
         setBuffer('');
@@ -26,32 +25,37 @@ function EntryModal({ isOpen, onClose, onSuccess }) {
             setError('Por favor, selecione um buffer.');
             return;
         }
-        // Validação de perfil só se não for SAL
+        
         if (buffer !== 'SAL' && !profile) {
             setError('Por favor, selecione um perfil de pacote para RTS ou EHA.');
             return;
         }
 
         try {
-            // Envia profile: null se for SAL, senão envia o selecionado
+            // CORREÇÃO PARA O JAVA:
+            // 1. profileType em vez de profile? Não, o DTO do Java usa "profile".
+            // 2. Se for SAL, enviamos "N/A" para passar na validação @Pattern do Java, 
+            //    já que o backend trata o N/A.
             const payload = {
                 trackingId,
                 buffer,
                 rua,
-                profile: buffer === 'SAL' ? null : profile
+                profile: buffer === 'SAL' ? 'N/A' : profile
             };
-            await api.post('/api/entry', payload);
+            
+            // Rota ajustada
+            await api.post('/api/packages/entry', payload);
+            
             onSuccess();
-            onClose(); // Fecha antes de limpar
-            clearForm(); // Limpa depois de fechar
+            onClose(); 
+            clearForm(); 
         } catch (err) {
-            setError(err.response?.data?.error || 'Falha ao adicionar item.');
+            setError(err.response?.data?.error || err.response?.data || 'Falha ao adicionar item.');
         }
     };
 
-    // --- ATUALIZA LIMPEZA NO FECHAMENTO ---
     const handleClose = () => {
-        clearForm(); // Limpa ao fechar pelo botão ou overlay
+        clearForm();
         onClose();
     }
 
@@ -59,7 +63,7 @@ function EntryModal({ isOpen, onClose, onSuccess }) {
 
     const handleOverlayClick = (e) => {
         if (e.target === e.currentTarget) {
-             handleClose(); // Usa a função handleClose
+             handleClose();
         }
     };
 
@@ -76,13 +80,11 @@ function EntryModal({ isOpen, onClose, onSuccess }) {
 
                     <label>Buffer</label>
                     <div className="buffer-options">
-                        {/* Atualiza o estado e limpa o perfil se mudar para SAL */}
                         <button type="button" className={`buffer-button ${buffer === 'RTS' ? 'selected' : ''}`} onClick={() => setBuffer('RTS')}> RTS </button>
                         <button type="button" className={`buffer-button ${buffer === 'EHA' ? 'selected' : ''}`} onClick={() => setBuffer('EHA')}> EHA </button>
                         <button type="button" className={`buffer-button ${buffer === 'SAL' ? 'selected' : ''}`} onClick={() => { setBuffer('SAL'); setProfile(''); }}> SALVADOS </button>
                     </div>
 
-                    {/* --- SEÇÃO DE PERFIL CONDICIONAL --- */}
                     {buffer && buffer !== 'SAL' && (
                         <>
                             <label>Perfil do Pacote (Quantidade)</label>
@@ -93,7 +95,6 @@ function EntryModal({ isOpen, onClose, onSuccess }) {
                             </div>
                         </>
                     )}
-                    {/* --- FIM DA SEÇÃO CONDICIONAL --- */}
 
                     <label htmlFor="rua">Rua</label>
                     <input id="rua" type="text" value={rua} onChange={e => setRua(e.target.value)} placeholder="Ex: RTS-002" required />

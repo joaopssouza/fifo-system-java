@@ -10,7 +10,8 @@ function ExitModal({ isOpen, onClose, onSuccess, availableIDs }) {
         e.preventDefault();
         setError('');
         try {
-            await api.post('/api/exit', { trackingId });
+            // Rota ajustada para o Java
+            await api.post('/api/packages/exit', { trackingId });
             onSuccess();
             onClose();
             setTrackingId('');
@@ -25,7 +26,6 @@ function ExitModal({ isOpen, onClose, onSuccess, availableIDs }) {
         setTrackingId(id);
     };
 
-    // --- NOVA LÓGICA ---
     const handleOverlayClick = (e) => {
         if (e.target === e.currentTarget) {
             onClose();
@@ -46,7 +46,9 @@ function ExitModal({ isOpen, onClose, onSuccess, availableIDs }) {
 
                     <div className="available-ids">
                         <span>IDs sugeridos:</span>
-                        {availableIDs.slice(0, 4).map(id => <span key={id} className="id-tag" onClick={() => handleTagClick(id)}>{id}</span>)}
+                        {availableIDs && availableIDs.slice(0, 4).map(id => (
+                            <span key={id} className="id-tag" onClick={() => handleTagClick(id)}>{id}</span>
+                        ))}
                     </div>
 
                     <button type="submit" className="modal-submit-button red">Confirmar Saída</button>

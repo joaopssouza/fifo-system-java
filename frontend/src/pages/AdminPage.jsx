@@ -12,13 +12,13 @@ const CreateUserModal = ({ isOpen, onClose, onSuccess, roles, actingUserRole }) 
         if (actingUserRole === 'admin') {
             return roles; 
         }
-        return roles.filter(role => role.Name !== 'admin' && role.Name !== 'leader');
+        return roles.filter(role => role.name !== 'admin' && role.name !== 'leader');
     }, [roles, actingUserRole]);
 
     const [username, setUsername] = useState('');
     const [fullName, setFullName] = useState('');
     const [password, setPassword] = useState('');
-    const [role, setRole] = useState(assignableRoles[0]?.Name || 'fifo');
+    const [role, setRole] = useState(assignableRoles[0]?.name || 'fifo');
     const [sector, setSector] = useState(SECTORS[0]);
     const [error, setError] = useState('');
 
@@ -36,7 +36,7 @@ const CreateUserModal = ({ isOpen, onClose, onSuccess, roles, actingUserRole }) 
 
     if (!isOpen) return null;
 
- const handleOverlayClick = (e) => {
+    const handleOverlayClick = (e) => {
         if (e.target === e.currentTarget) {
             onClose();
         }
@@ -60,10 +60,9 @@ const CreateUserModal = ({ isOpen, onClose, onSuccess, roles, actingUserRole }) 
                     <label>Papel</label>
                     <select value={role} onChange={e => setRole(e.target.value)} required>
                         {assignableRoles.map(r => (
-                            <option key={r.ID} value={r.Name}>{r.Name.toUpperCase()}</option>
+                            <option key={r.id} value={r.name}>{r.name.toUpperCase()}</option>
                         ))}
                     </select>
-                    {/* O campo de texto do setor foi substituído por um <select> */}
                     <label>Setor</label>
                     <select value={sector} onChange={e => setSector(e.target.value)} required>
                         {SECTORS.map(s => (
@@ -86,9 +85,10 @@ const EditUserModal = ({ isOpen, onClose, onSuccess, user, roles }) => {
 
     useEffect(() => {
         if (user) {
-            setFullName(user.FullName);
-            setRoleId(user.RoleID);
-            setSector(user.Sector);
+            // CORREÇÃO: Usando camelCase conforme DTO Java
+            setFullName(user.fullName);
+            setRoleId(user.roleId);
+            setSector(user.sector);
         }
     }, [user]);
 
@@ -96,7 +96,7 @@ const EditUserModal = ({ isOpen, onClose, onSuccess, user, roles }) => {
         e.preventDefault();
         setError('');
         try {
-            await api.put(`/api/management/users/${user.ID}`, {fullName, roleId: parseInt(roleId, 10), sector });
+            await api.put(`/api/management/users/${user.id}`, {fullName, roleId: parseInt(roleId, 10), sector });
             onSuccess();
             onClose();
         } catch (err) {
@@ -106,7 +106,7 @@ const EditUserModal = ({ isOpen, onClose, onSuccess, user, roles }) => {
 
     if (!isOpen || !user) return null;
 
-      const handleOverlayClick = (e) => {
+    const handleOverlayClick = (e) => {
         if (e.target === e.currentTarget) {
             onClose();
         }
@@ -116,7 +116,7 @@ const EditUserModal = ({ isOpen, onClose, onSuccess, user, roles }) => {
         <div className="modal-overlay" onMouseDown={handleOverlayClick}>
             <div className="modal-content" onClick={e => e.stopPropagation()}>
                 <div className="modal-header">
-                    <h2>Editar Utilizador: {user.Username.toUpperCase()}</h2>
+                    <h2>Editar Utilizador: {user.username.toUpperCase()}</h2>
                     <button className="modal-close-button" onClick={onClose}>&times;</button>
                 </div>
                 <form onSubmit={handleUpdate}>
@@ -125,9 +125,9 @@ const EditUserModal = ({ isOpen, onClose, onSuccess, user, roles }) => {
                     <label>Papel</label>
                     <select value={roleId} onChange={e => setRoleId(e.target.value)}>
                         {roles
-                            .filter(role => role.Name !== 'admin')
+                            .filter(role => role.name !== 'admin')
                             .map(role => (
-                                <option key={role.ID} value={role.ID}>{role.Name.toUpperCase()}</option>
+                                <option key={role.id} value={role.id}>{role.name.toUpperCase()}</option>
                             ))
                         }
                     </select>
@@ -152,7 +152,7 @@ const ResetPasswordModal = ({ isOpen, onClose, user }) => {
         e.preventDefault(); 
         setError(''); 
         try { 
-            await api.put(`/api/management/users/${user.ID}/reset-password`, { newPassword }); 
+            await api.put(`/api/management/users/${user.id}/reset-password`, { newPassword }); 
             onClose(); 
         } catch (err) { 
             setError(err.response?.data?.error || "Falha ao redefinir a senha."); 
@@ -160,7 +160,7 @@ const ResetPasswordModal = ({ isOpen, onClose, user }) => {
     }; 
     if (!isOpen || !user) return null; 
 
-        const handleOverlayClick = (e) => {
+    const handleOverlayClick = (e) => {
         if (e.target === e.currentTarget) {
             onClose();
         }
@@ -170,7 +170,7 @@ const ResetPasswordModal = ({ isOpen, onClose, user }) => {
         <div className="modal-overlay" onMouseDown={handleOverlayClick}>
             <div className="modal-content" onClick={e => e.stopPropagation()}>
                 <div className="modal-header">
-                    <h2>Redefinir Senha de: {user.Username.toUpperCase()}</h2>
+                    <h2>Redefinir Senha de: {user.username.toUpperCase()}</h2>
                     <button className="modal-close-button" onClick={onClose}>&times;</button>
                 </div>
                 <form onSubmit={handleReset}>
@@ -203,7 +203,8 @@ function AdminPage() {
                 api.get('/api/management/users'),
                 api.get('/api/management/roles')
             ]);
-            setUsers(usersRes.data.data || []);
+            // O Java retorna listas diretas no .data (para users) e map no roles
+            setUsers(usersRes.data || []);
             setRoles(rolesRes.data.data || []);
         } catch (error) { console.error("Falha ao buscar dados de administração", error); } 
         finally { setLoading(false); }
@@ -212,11 +213,12 @@ function AdminPage() {
     useEffect(() => { fetchAdminData(); }, [fetchAdminData]);
     
     const canPerformActionsOn = (targetUser) => {
-        if (actingUser.username === targetUser.Username) return false;
-        if (targetUser.Role.Name === 'admin') return false;
+        if (actingUser.username === targetUser.username) return false;
+        // CORREÇÃO: roleName direto do DTO
+        if (targetUser.roleName === 'admin') return false;
         if (actingUser.role === 'admin') return true;
         if (actingUser.role === 'leader') {
-            return targetUser.Role.Name !== 'leader';
+            return targetUser.roleName !== 'leader';
         }
         return false;
     };
@@ -252,11 +254,12 @@ function AdminPage() {
                         <tbody>
                             {loading ? (<tr><td colSpan="5">A carregar...</td></tr>) 
                             : users.map(user => (
-                                <tr key={user.ID}>
-                                    <td>{user.FullName.toUpperCase()}</td>
-                                    <td>{user.Username.toUpperCase()}</td>
-                                    <td>{user.Role.Name.toUpperCase()}</td>
-                                    <td>{user.Sector.toUpperCase()}</td>
+                                <tr key={user.id}>
+                                    {/* CORREÇÃO: Campos camelCase */}
+                                    <td>{user.fullName.toUpperCase()}</td>
+                                    <td>{user.username.toUpperCase()}</td>
+                                    <td>{user.roleName.toUpperCase()}</td>
+                                    <td>{user.sector.toUpperCase()}</td>
                                     <td>
                                         {canPerformActionsOn(user) && (
                                             <div className="action-buttons-cell">

@@ -34,7 +34,7 @@ function LogsPage() {
             }
 
             const response = await api.get(`/api/management/logs?${params.toString()}`);
-            setLogs(response.data.data || []);
+            setLogs(response.data || []);
         } catch (err) {
             setError('Falha ao carregar logs. Você tem permissão de administrador?');
             console.error(err);
@@ -137,16 +137,16 @@ function LogsPage() {
                             <tr><td colSpan="5">A carregar...</td></tr>
                         ) : logs.length > 0 ? (
                             logs.map(log => (
-                                <tr key={log.ID}>
-                                    <td>{formatTimestamp(log.CreatedAt)}</td>
-                                    <td>{log.UserFullname}</td>
-                                    <td>{log.Username}</td>
+                                <tr key={log.id}>
+                                    <td>{formatTimestamp(log.createdAt)}</td>
+                                    <td>{log.userFullname}</td>
+                                    <td>{log.username}</td>
                                     <td>
-                                        <span className={`action-tag ${log.Action.toLowerCase()}`}>
-                                            {log.Action}
+                                        <span className={`action-tag ${log.action.toLowerCase()}`}>
+                                            {log.action}
                                         </span>
                                     </td>
-                                    <td>{log.Details}</td>
+                                    <td>{log.details}</td>
                                 </tr>
                             ))
                         ) : (
