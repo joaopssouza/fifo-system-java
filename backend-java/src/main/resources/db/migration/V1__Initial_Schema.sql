@@ -1,7 +1,7 @@
 -- V1__Initial_Schema.sql
 
 -- Criação da tabela de Papéis (Roles)
-CREATE TABLE roles (
+CREATE TABLE IF NOT EXISTS roles (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(50) NOT NULL UNIQUE,
     description VARCHAR(255),
@@ -10,7 +10,7 @@ CREATE TABLE roles (
 );
 
 -- Criação da tabela de Usuários (Users)
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     id BIGSERIAL PRIMARY KEY,
     full_name VARCHAR(100) NOT NULL,
     username VARCHAR(50) NOT NULL UNIQUE,

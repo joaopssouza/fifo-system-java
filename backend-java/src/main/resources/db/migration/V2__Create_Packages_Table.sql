@@ -1,6 +1,6 @@
 -- V2__Create_Packages_Table.sql
 
-CREATE TABLE packages (
+CREATE TABLE IF NOT EXISTS packages (
     id BIGSERIAL PRIMARY KEY,
     tracking_id VARCHAR(50) NOT NULL UNIQUE,
     buffer VARCHAR(50) NOT NULL, -- Ex: RTS, EHA
@@ -15,5 +15,5 @@ CREATE TABLE packages (
 );
 
 -- Índices para performance (Diferencial de Sênior)
-CREATE INDEX idx_packages_buffer ON packages(buffer);
-CREATE INDEX idx_packages_tracking_id ON packages(tracking_id);
+CREATE INDEX IF NOT EXISTS idx_packages_buffer ON packages(buffer);
+CREATE INDEX IF NOT EXISTS idx_packages_tracking_id ON packages(tracking_id);
