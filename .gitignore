@@ -8,3 +8,7 @@
 # Arquivos de ferramentas de IDE
 .vscode/
 .idea/
+
+# Arquivos de build
+target/
+backend-java/

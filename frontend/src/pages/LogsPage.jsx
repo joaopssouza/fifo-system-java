@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 
 const formatTimestamp = (timestamp) => {
+    if (!timestamp) return '---';
     return new Date(timestamp).toLocaleString('pt-BR');
 };
 
@@ -28,13 +29,15 @@ function LogsPage() {
             if (filters.username) params.append('username', filters.username);
             if (filters.fullname) params.append('fullname', filters.fullname);
             if (filters.action) params.append('action', filters.action);
-            if (filters.startDate && filters.endDate) {
-                params.append('startDate', filters.startDate);
-                params.append('endDate', filters.endDate);
-            }
+            if (filters.startDate) params.append('startDate', filters.startDate);
+            if (filters.endDate) params.append('endDate', filters.endDate);
 
             const response = await api.get(`/api/management/logs?${params.toString()}`);
-            setLogs(response.data || []);
+            
+            // CORREÇÃO 1: O Java retorna a lista direto em response.data
+            // Antes estava response.data.data, por isso a lista ficava vazia
+            setLogs(response.data || []); 
+            
         } catch (err) {
             setError('Falha ao carregar logs. Você tem permissão de administrador?');
             console.error(err);
@@ -63,7 +66,6 @@ function LogsPage() {
                 <button onClick={() => navigate('/')} className="back-button">Voltar ao Dashboard</button>
             </header>
 
-            {/* --- PAINEL DE FILTROS MODIFICADO --- */}
             <div className="filters-panel">
                 <div className="input-with-label">
                     <label htmlFor="username">Filtrar por utilizador</label>
@@ -118,8 +120,6 @@ function LogsPage() {
                 </div>
                 <button onClick={clearFilters} className="clear-filters-button">Limpar Filtros</button>
             </div>
-            {/* --- FIM DA MODIFICAÇÃO --- */}
-
 
             <div className="table-container">
                 <table className="logs-table">
@@ -137,12 +137,13 @@ function LogsPage() {
                             <tr><td colSpan="5">A carregar...</td></tr>
                         ) : logs.length > 0 ? (
                             logs.map(log => (
+                                // CORREÇÃO 2: Usar camelCase (minúsculo) para acessar as propriedades do objeto Java
                                 <tr key={log.id}>
                                     <td>{formatTimestamp(log.createdAt)}</td>
                                     <td>{log.userFullname}</td>
                                     <td>{log.username}</td>
                                     <td>
-                                        <span className={`action-tag ${log.action.toLowerCase()}`}>
+                                        <span className={`action-tag ${log.action ? log.action.toLowerCase() : ''}`}>
                                             {log.action}
                                         </span>
                                     </td>

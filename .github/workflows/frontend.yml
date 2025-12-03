@@ -1,0 +1,39 @@
+name: Frontend CI (React)
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+    paths:
+      - 'frontend/**' # Só roda se mexer no frontend
+  pull_request:
+    branches: [ "main", "develop" ]
+    paths:
+      - 'frontend/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+
+    - name: Install Dependencies
+      run: npm ci
+
+    - name: Lint Check
+      # Verifica se o código segue os padrões (ESLint)
+      run: npm run lint
+
+    - name: Build Project
+      # Verifica se o build de produção ocorre sem erros
+      run: npm run build

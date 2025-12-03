@@ -21,6 +21,9 @@ RUN npm run build
 # Usa uma imagem base de um servidor web leve e seguro (Nginx)
 FROM nginx:stable-alpine
 
+# Copia a nossa configuração personalizada do Nginx
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
 # Copia os arquivos estáticos gerados no build do React para a pasta que o Nginx serve
 COPY --from=builder /app/dist /usr/share/nginx/html
 

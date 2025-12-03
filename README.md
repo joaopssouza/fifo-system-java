@@ -1,52 +1,120 @@
-# FIFO System (Spring Boot Edition) 🚀
+# FIFO System - Sistema de Controle Logístico
 
-Portfólio técnico desenvolvido para demonstrar proficiência em engenharia de software backend com **Java 21** e **Spring Boot 3**. Este projeto é uma migração e modernização de um sistema de gestão logística, aplicando padrões de projeto Enterprise.
+Sistema de gestão logística de alta performance focado na metodologia **FIFO (First-In, First-Out)**. A aplicação gerencia o fluxo de entrada e saída de pacotes, rastreamento via QR Code, monitoramento em tempo real e auditoria completa de operações.
 
-## 🛠️ Tecnologias Utilizadas
+Este projeto foi modernizado para uma arquitetura **Enterprise** utilizando **Java 21** e **Spring Boot 3**, garantindo escalabilidade, segurança e manutenibilidade.
 
-* **Java 21:** Uso de *Records*, *Pattern Matching* e *Switch Expressions*.
-* **Spring Boot 3.4:** Framework principal.
-* **Spring Data JPA:** Camada de persistência e abstração de banco de dados.
-* **Flyway:** Versionamento e migração de banco de dados (*Database as Code*).
-* **Spring Security + JWT:** Autenticação *Stateless* e segura.
-* **PostgreSQL:** Banco de dados relacional.
-* **JUnit 5 & Mockito:** Testes unitários para garantia de qualidade.
-* **Docker:** Containerização da aplicação (Multi-stage build).
-* **Swagger (OpenAPI):** Documentação interativa da API.
+---
+
+## 🚀 Stack Tecnológica
+
+O projeto adota as práticas de mercado mais recentes para desenvolvimento de software corporativo.
+
+### Backend (Java Ecosystem)
+* **Core:** Java 21, Spring Boot 3.4
+* **Persistência:** Spring Data JPA (Hibernate), PostgreSQL
+* **Database Migration:** Flyway (Versionamento de Schema e Dados)
+* **Segurança:** Spring Security 6, JWT (Stateless Authentication), BCrypt
+* **Documentação:** SpringDoc OpenAPI (Swagger UI)
+* **Testes:** JUnit 5, Mockito
+* **Tempo Real:** Spring WebSocket
+
+### Frontend
+* **Framework:** React 18 (Vite)
+* **Estilização:** CSS Modules (Design Responsivo e Dark Mode)
+* **Integração:** Axios (Interceptor para JWT)
+* **Utils:** QRCode.react, jsPDF
+
+### DevOps & Infra
+* **Containerização:** Docker, Docker Compose (Multi-stage build)
+* **CI/CD:** GitHub Actions (Pipeline de Build e Testes)
+
+---
 
 ## 🏛️ Arquitetura e Design
 
-O projeto segue a **Clean Architecture** simplificada, focada na separação de responsabilidades:
+O backend segue princípios de **Clean Architecture**, priorizando a separação de responsabilidades para facilitar testes e evolução.
 
-1.  **Controller Layer:** Apenas recebe requisições HTTP e valida DTOs.
-2.  **Service Layer:** Contém toda a regra de negócio (ex: validação de duplicidade, cálculo de perfil).
-3.  **Repository Layer:** Interfaces JPA para acesso a dados.
-4.  **Security Layer:** Filtros e Providers desacoplados para gestão de JWT.
+1.  **Domain Layer:** Entidades JPA (`User`, `ProductPackage`, `AuditLog`) isoladas, representando o núcleo do negócio.
+2.  **Repository Layer:** Interfaces Spring Data para abstração do acesso a dados, utilizando **JPA Specifications** para consultas dinâmicas e filtros complexos.
+3.  **Service Layer:** Contém todas as regras de negócio (ex: validação de duplicidade, cálculo de perfil de carga, lógica FIFO), desacoplada do framework web.
+4.  **Controller Layer:** Camada REST que gerencia apenas a entrada/saída HTTP e validação de DTOs (`@Valid`).
 
-### Destaques
-* **Auditoria Automática:** Um serviço de `AuditService` utiliza o `SecurityContext` para registrar automaticamente quem realizou cada ação (Entrada/Saída/Movimentação), sem poluir a lógica de negócio.
-* **Tratamento de Erros:** Exceções de negócio são capturadas e transformadas em respostas HTTP adequadas.
+### Destaques Técnicos
+* **Auditoria Desacoplada:** Implementação de um serviço de *Auditing* que intercepta operações críticas (Entrada/Saída) e registra automaticamente o autor via Contexto de Segurança, sem poluir a lógica principal.
+* **Database as Code:** Nenhuma tabela é criada manualmente. Todo o ciclo de vida do banco (DDL e DML de seed) é gerido via scripts SQL versionados pelo **Flyway**.
+* **Soft Deletes:** Implementação de exclusão lógica para preservação de histórico operacional.
+* **Monitoramento em Tempo Real:** WebSocket configurado para transmitir a lista de utilizadores online instantaneamente entre clientes conectados.
 
-## 🚀 Como Rodar
+---
+
+## 🛠️ Instalação e Execução
 
 ### Pré-requisitos
-* Java 21
-* Docker (opcional, para banco de dados)
+* Docker e Docker Compose instalados.
+* **Ou:** JDK 21 e Maven configurados localmente.
 
-### Passos
-1.  Configure as variáveis de ambiente no arquivo `.env`:
-    ```ini
-    DB_PASSWORD=sua_senha_supabase
-    JWT_SECRET=seu_segredo_super_seguro
-    ```
-2.  Execute a aplicação:
+### Opção A: Execução via Docker (Recomendado)
+Para subir o ambiente completo (Banco + Backend + Frontend) em container:
+
+```bash
+docker-compose up --build
+````
+
+  * **Frontend:** [http://localhost:5173](https://www.google.com/search?q=http://localhost:5173)
+  * **Backend API:** [http://localhost:8080](https://www.google.com/search?q=http://localhost:8080)
+
+### Opção B: Execução Manual (Dev)
+
+1.  **Banco de Dados:**
+    Certifique-se de ter um PostgreSQL rodando e configure as variáveis no arquivo `backend-java/.env` ou variáveis de ambiente do sistema.
+
+2.  **Backend:**
+
     ```bash
+    cd backend-java
     ./mvnw spring-boot:run
     ```
-3.  Acesse a documentação Swagger:
-    👉 `http://localhost:8080/swagger-ui/index.html`
 
-## ✅ Testes
-Para executar a suite de testes unitários:
+3.  **Frontend:**
+
+    ```bash
+    cd frontend
+    npm install
+    npm run dev
+    ```
+
+-----
+
+## 📚 Documentação da API
+
+A API está totalmente documentada com **Swagger/OpenAPI**.
+Após iniciar o backend, acesse:
+
+👉 **[http://localhost:8080/swagger-ui/index.html](https://www.google.com/search?q=http://localhost:8080/swagger-ui/index.html)**
+
+Lá é possível testar todos os endpoints, incluindo autenticação e operações de pacotes.
+
+-----
+
+## 🧪 Testes Automatizados
+
+O projeto possui cobertura de testes unitários para as regras de negócio críticas (Serviços de Usuário, Pacotes e QR Code).
+
+Para executar a suite de testes:
+
 ```bash
+cd backend-java
 ./mvnw test
+```
+
+-----
+
+## 👤 Acesso Inicial
+
+O sistema inicializa automaticamente (via Flyway Migration) com um utilizador administrador:
+
+  * **Usuário:** `admin`
+  * **Senha:** `admin`
+
+> **Nota:** Recomenda-se alterar a senha no primeiro acesso através do painel de perfil.
