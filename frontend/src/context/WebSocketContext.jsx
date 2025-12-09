@@ -31,8 +31,9 @@ export const WebSocketProvider = ({ children }) => {
                             setOnlineUsers(message.data || []);
                         }
                     }
-                } catch {
+                } catch (err) {
                     // Falha silenciosa no parse para não poluir o console
+                    void err;
                 }
             };
 
