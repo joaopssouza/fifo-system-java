@@ -67,7 +67,7 @@ const loadData = useCallback(async () => {
         } finally {
             setLoading(false);
         }
-    }, [isGuest]);
+    }, []);
 
     // Sincronizar Tempo
     useEffect(() => {

@@ -9,15 +9,14 @@ export const AuthProvider = ({ children }) => {
     const [token, setToken] = useState(() => localStorage.getItem('token'));
     const [user, setUser] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
-    // --- NOVO ESTADO ---
     const [isGuest, setIsGuest] = useState(() => sessionStorage.getItem('isGuest') === 'true');
 
     const logout = useCallback(() => {
         localStorage.removeItem('token');
-        sessionStorage.removeItem('isGuest'); // --- ADICIONADO ---
+        sessionStorage.removeItem('isGuest');
         setToken(null);
         setUser(null);
-        setIsGuest(false); // --- ADICIONADO ---
+        setIsGuest(false);
         delete api.defaults.headers.common['Authorization'];
     }, []);
 
@@ -40,9 +39,8 @@ export const AuthProvider = ({ children }) => {
                 console.error("Falha ao descodificar o token", error);
                 logout();
             }
-        // --- LÓGICA DE CONVIDADO ADICIONADA ---
         } else if (isGuest) {
-            setUser({ username: 'Convidado', permissions: [] }); // Define um usuário "falso" para convidado
+            setUser({ username: 'Convidado', permissions: [] });
         } else {
             setUser(null);
         }
@@ -56,7 +54,6 @@ export const AuthProvider = ({ children }) => {
         setToken(newToken);
     }, []);
 
-    // --- NOVA FUNÇÃO ---
     const loginAsGuest = useCallback(() => {
         localStorage.removeItem('token');
         sessionStorage.setItem('isGuest', 'true');
@@ -66,7 +63,6 @@ export const AuthProvider = ({ children }) => {
 
 
     const hasPermission = useCallback((permissionName) => {
-        // Convidados nunca têm permissões
         if (isGuest) return false;
         return user?.permissions.includes(permissionName) ?? false;
     }, [user, isGuest]);
@@ -75,12 +71,12 @@ export const AuthProvider = ({ children }) => {
 
     const value = useMemo(() => ({
         isAuthenticated,
-        isGuest, // --- EXPOSTO ---
+        isGuest,
         token,
         user,
         isLoading,
         login,
-        loginAsGuest, // --- EXPOSTO ---
+        loginAsGuest,
         logout,
         hasPermission
     }), [isAuthenticated, isGuest, token, user, isLoading, login, logout, hasPermission, loginAsGuest]);
@@ -92,6 +88,7 @@ export const AuthProvider = ({ children }) => {
     );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => {
     return useContext(AuthContext);
 };

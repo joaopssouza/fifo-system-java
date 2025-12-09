@@ -36,6 +36,7 @@ body {
 input[type="text"],
 input[type="password"],
 input[type="number"],
+input[type="date"],
 select {
   width: 100%;
   padding: 14px;
@@ -49,6 +50,16 @@ select {
 
 input::placeholder {
   color: var(--color-secondary);
+}
+
+/* Estilos adicionais para input date */
+input[type="date"] {
+  cursor: pointer;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
 }
 
 button {

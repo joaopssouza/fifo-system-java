@@ -1,3 +1,4 @@
+// src/context/WebSocketContext.jsx
 import React, { createContext, useState, useEffect, useContext, useMemo } from 'react';
 import { useAuth } from './AuthContext';
 
@@ -30,12 +31,11 @@ export const WebSocketProvider = ({ children }) => {
                             setOnlineUsers(message.data || []);
                         }
                     }
-                } catch (e) {
+                } catch {
                     // Falha silenciosa no parse para não poluir o console
                 }
             };
 
-            // Removemos os logs de onclose/onerror para manter o console limpo
             ws.onclose = () => {
                 setIsConnected(false);
                 setOnlineUsers([]);
@@ -50,7 +50,9 @@ export const WebSocketProvider = ({ children }) => {
         }
 
         return () => {
-            if (ws) ws.close();
+            if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) {
+                ws.close();
+            }
         };
     }, [token, isGuest, user]);
 
@@ -66,6 +68,7 @@ export const WebSocketProvider = ({ children }) => {
     );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useWebSocket = () => {
     return useContext(WebSocketContext);
 };

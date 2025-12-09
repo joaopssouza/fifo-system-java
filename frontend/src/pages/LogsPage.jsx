@@ -24,6 +24,7 @@ function LogsPage() {
 
     const fetchLogs = useCallback(async () => {
         setLoading(true);
+        setError(''); // Limpa erros anteriores
         try {
             const params = new URLSearchParams();
             if (filters.username) params.append('username', filters.username);
@@ -34,12 +35,10 @@ function LogsPage() {
 
             const response = await api.get(`/api/management/logs?${params.toString()}`);
             
-            // CORREÇÃO 1: O Java retorna a lista direto em response.data
-            // Antes estava response.data.data, por isso a lista ficava vazia
             setLogs(response.data || []); 
             
         } catch (err) {
-            setError('Falha ao carregar logs. Você tem permissão de administrador?');
+            setError('Falha ao carregar logs. Verifique sua conexão ou permissões.');
             console.error(err);
         } finally {
             setLoading(false);
@@ -65,6 +64,9 @@ function LogsPage() {
                 <h1>Logs de Atividade</h1>
                 <button onClick={() => navigate('/')} className="back-button">Voltar ao Dashboard</button>
             </header>
+
+            {/* Exibição de Erro Adicionada */}
+            {error && <p className="error-message">{error}</p>}
 
             <div className="filters-panel">
                 <div className="input-with-label">
@@ -137,7 +139,6 @@ function LogsPage() {
                             <tr><td colSpan="5">A carregar...</td></tr>
                         ) : logs.length > 0 ? (
                             logs.map(log => (
-                                // CORREÇÃO 2: Usar camelCase (minúsculo) para acessar as propriedades do objeto Java
                                 <tr key={log.id}>
                                     <td>{formatTimestamp(log.createdAt)}</td>
                                     <td>{log.userFullname}</td>
