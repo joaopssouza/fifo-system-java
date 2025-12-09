@@ -27,6 +27,9 @@ jobs:
         distribution: 'temurin'
         cache: maven
 
+    - name: Make mvnw executable
+      # Garante que o wrapper Maven tem permissão de execução no runner
+      run: chmod +x ./mvnw
     - name: Build with Maven
       # Compila o projeto
       run: ./mvnw clean package -DskipTests
