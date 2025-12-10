@@ -1,5 +1,13 @@
 # FIFO System - Sistema de Controle Logístico
 
+<p align="center">
+  <img src=".github/assets/login-desktop.png" alt="Tela de Login" width="35%" style="vertical-align: middle; margin-right: 10px;">
+  <img src=".github/assets/mobile-dashboard.png" alt="Dashboard Mobile" width="21%" style="vertical-align: middle;">
+</p>
+<p align="center">
+  <em>Acesso Seguro (Desktop) e Monitoramento em Tempo Real (Mobile)</em>
+</p>
+
 Sistema de gestão logística de alta performance focado na metodologia **FIFO (First-In, First-Out)**. A aplicação gerencia o fluxo de entrada e saída de pacotes, rastreamento via QR Code, monitoramento em tempo real e auditoria completa de operações.
 
 Este projeto foi modernizado para uma arquitetura **Enterprise** utilizando **Java 21** e **Spring Boot 3**, garantindo escalabilidade, segurança e manutenibilidade.
@@ -44,7 +52,7 @@ A API do sistema é totalmente documentada e interativa, seguindo o padrão **Op
 
 Após iniciar a aplicação (via Docker ou localmente), a documentação estará disponível em:
 
-👉 **[http://localhost:8080/swagger-ui/index.html](https://www.google.com/search?q=http://localhost:8080/swagger-ui/index.html)**
+👉 **[http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)**
 
 ### Funcionalidades Documentadas:
 
@@ -66,6 +74,18 @@ O sistema foi desenhado com foco em desacoplamento e robustez:
 
 -----
 
+### Galeria de Funcionalidades
+
+| Gestão de Logs e Auditoria | Gerador de Etiquetas QR Code |
+|:--------------------------:|:----------------------------:|
+| <img src=".github/assets/audit-logs.png" width="100%"> | <img src=".github/assets/qr-generator.png" width="100%"> |
+| *Rastreabilidade completa de ações* | *Geração e impressão de etiquetas em PDF* |
+
+| Preview de Impressão | Painel Administrativo |
+|:--------------------:|:-------------:|
+| <img src=".github/assets/qr-print-preview.png" width="100%"> | <img src=".github/assets/admin-panel.png" width="100%"> |
+| *Layout A4 para etiquetas físicas* | *Gestão de usuários e permissões (RBAC)* |
+
 ## 🚀 Como Executar o Projeto
 
 ### Pré-requisitos
@@ -77,7 +97,7 @@ O sistema foi desenhado com foco em desacoplamento e robustez:
 1.  **Clone o repositório:**
 
     ```bash
-    git clone https://github.com/joaopssouza/fifo-system-java.git
+    git clone [https://github.com/joaopssouza/fifo-system-java.git](https://github.com/joaopssouza/fifo-system-java.git)
     cd fifo-system-java
     ```
 
@@ -92,8 +112,8 @@ O sistema foi desenhado com foco em desacoplamento e robustez:
 
 4.  **Acesse:**
 
-      * **Aplicação:** [http://localhost:5173](https://www.google.com/search?q=http://localhost:5173)
-      * **Swagger API:** [http://localhost:8080/swagger-ui/index.html](https://www.google.com/search?q=http://localhost:8080/swagger-ui/index.html)
+      * **Aplicação:** [http://localhost:5173](http://localhost:5173)
+      * **Swagger API:** [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
 
 ### Credenciais Iniciais
 
@@ -103,6 +123,7 @@ O sistema cria automaticamente um usuário administrador na primeira execução:
   * **Senha:** `admin`
 
 > **Nota:** Recomenda-se alterar a senha no primeiro acesso através do painel de perfil.
+
 -----
 
 ## 🧪 Qualidade e Testes
@@ -117,7 +138,7 @@ Para rodar os testes localmente:
 ```bash
 cd backend
 ./mvnw test
-```
+````
 
 -----
 
